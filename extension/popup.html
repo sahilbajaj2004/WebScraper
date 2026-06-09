@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Maps Lead Scraper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Maps Lead Scraper</h1>
+      <p class="subtitle">Extract business leads for cold calling</p>
+    </div>
+
+    <div class="status" id="status">
+      <p>Ready to scrape Google Maps</p>
+    </div>
+
+    <div class="info-box">
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Search on Google Maps (e.g., "restaurants in NYC")</li>
+        <li>Scroll to load more results</li>
+        <li>Click "Start Scraping" below</li>
+      </ol>
+    </div>
+
+    <div class="controls">
+      <div class="input-group">
+        <label for="maxResults">Max results:</label>
+        <input type="number" id="maxResults" value="50" min="1" max="500">
+      </div>
+
+      <button type="button" id="scrapeBtn" class="btn-primary">
+        Start Scraping
+      </button>
+
+      <button type="button" id="exportBtn" class="btn-secondary" disabled>
+        Download Excel
+      </button>
+    </div>
+
+    <div class="results" id="results">
+      <h3>Results: <span id="count">0</span></h3>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">With Phone:</span>
+          <span class="stat-value" id="phoneCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">With Website:</span>
+          <span class="stat-value" id="websiteCount">0</span>
+        </div>
+      </div>
+      <div id="resultsList"></div>
+    </div>
+
+    <div class="footer">
+      <p>Tip: Scroll down in Google Maps to load more businesses before scraping</p>
+    </div>
+  </div>
+
+  <script src="xlsx.full.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

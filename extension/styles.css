@@ -151,6 +151,48 @@ body {
   cursor: not-allowed;
 }
 
+.sheet-setup {
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.sheet-setup summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.sheet-fields {
+  margin-top: 10px;
+}
+
+.sheet-fields label {
+  display: block;
+  font-size: 12px;
+  margin: 8px 0 4px;
+  color: #cccccc;
+}
+
+.sheet-fields input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #000000;
+  color: #ffffff;
+}
+
+.sheet-hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #999999;
+}
+
 .results {
   padding: 15px;
   border-top: 1px solid #ffffff;

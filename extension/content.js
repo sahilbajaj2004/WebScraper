@@ -34,18 +34,14 @@ async function scrapeGoogleMaps(maxResults) {
     throw new Error('Google Maps results not found. Please search for a location first.');
   }
 
-  // Build list of unique business URLs (not DOM elements)
-  const allLinks = Array.from(feedElement.querySelectorAll('a[href*="/maps/place/"]'));
-  const uniqueUrls = [];
-  const seenHrefs = new Set();
+  // Auto-scroll the results panel to load up to maxResults businesses.
+  // The feed is virtualized, so we must load entries before collecting them.
+  await scrollFeed(feedElement, maxResults);
 
-  for (const link of allLinks) {
-    const href = link.href.split('?')[0].split('#')[0]; // Clean URL
-    if (!seenHrefs.has(href)) {
-      seenHrefs.add(href);
-      uniqueUrls.push(href);
-    }
-  }
+  // Build list of unique business URLs (not DOM elements). DOM nodes are
+  // recycled across clicks, so we hold the cleaned href strings instead and
+  // re-find a fresh element on each iteration.
+  const uniqueUrls = collectUniqueUrls();
 
   if (uniqueUrls.length === 0) {
     throw new Error('No businesses found. Try scrolling down to load more results.');
@@ -65,9 +61,12 @@ async function scrapeGoogleMaps(maxResults) {
         continue;
       }
 
-      // Find a fresh element with this href
+      // Find a fresh element whose cleaned href matches the target. We compare
+      // hrefs in JS rather than building a CSS selector from URL fragments
+      // (those contain !,:/= and would be an invalid/incorrect selector).
       const feed = document.querySelector('div[role="feed"]');
-      const linkElement = feed.querySelector(`a[href*="${targetUrl.split('/').pop()}"]`);
+      const linkElement = Array.from(feed.querySelectorAll('a[href*="/maps/place/"]'))
+        .find(a => cleanUrl(a.href) === targetUrl);
 
       if (linkElement) {
         linkElement.click();
@@ -88,6 +87,9 @@ async function scrapeGoogleMaps(maxResults) {
           }
         }
       }
+
+      // Report live progress to the popup (best-effort; popup may be closed).
+      reportProgress(i + 1, totalToScrape, businesses.length);
     } catch (error) {
       console.error(`Error scraping business ${i + 1}:`, error);
       continue;
@@ -96,6 +98,71 @@ async function scrapeGoogleMaps(maxResults) {
 
   console.log(`Scraping complete. Total unique businesses: ${businesses.length}`);
   return businesses;
+}
+
+// Strip query string and fragment so the same place always has one canonical URL.
+function cleanUrl(href) {
+  return href.split('?')[0].split('#')[0];
+}
+
+// Collect unique, cleaned place URLs from the (already-scrolled) feed, in order.
+function collectUniqueUrls() {
+  const feed = document.querySelector('div[role="feed"]');
+  if (!feed) return [];
+
+  const uniqueUrls = [];
+  const seenHrefs = new Set();
+
+  for (const link of feed.querySelectorAll('a[href*="/maps/place/"]')) {
+    const href = cleanUrl(link.href);
+    if (!seenHrefs.has(href)) {
+      seenHrefs.add(href);
+      uniqueUrls.push(href);
+    }
+  }
+
+  return uniqueUrls;
+}
+
+// Scroll the results feed until enough places are loaded or no more appear.
+// Mirrors scraper.py's _scroll_results; the delays are deliberate rate-limiting.
+async function scrollFeed(feed, maxResults) {
+  let previousCount = 0;
+  let noChangeCount = 0;
+
+  while (true) {
+    const count = feed.querySelectorAll('a[href*="/maps/place/"]').length;
+
+    if (count >= maxResults) {
+      console.log(`Loaded ${count} results (target ${maxResults})`);
+      break;
+    }
+
+    if (count === previousCount) {
+      noChangeCount++;
+      if (noChangeCount >= 3) {
+        console.log(`No more results loading. Total: ${count}`);
+        break;
+      }
+    } else {
+      noChangeCount = 0;
+      reportProgress(0, maxResults, count, 'loading');
+    }
+
+    previousCount = count;
+    feed.scrollTop = feed.scrollHeight;
+    await sleep(1500);
+  }
+}
+
+// Best-effort progress message to the popup. Wrapped in try/catch because the
+// popup may be closed, which makes sendMessage throw "Receiving end does not exist".
+function reportProgress(done, total, scraped, phase = 'scraping') {
+  try {
+    chrome.runtime.sendMessage({ action: 'progress', phase, done, total, scraped });
+  } catch (e) {
+    // No popup listening — ignore.
+  }
 }
 
 function extractBusinessData() {
@@ -107,7 +174,8 @@ function extractBusinessData() {
     address: '',
     category: '',
     rating: '',
-    reviews: ''
+    reviews: '',
+    scraped_at: new Date().toLocaleString()
   };
 
   try {

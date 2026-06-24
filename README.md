@@ -6,10 +6,11 @@ Extract business leads from Google Maps directly in your Brave browser. Perfect 
 
 - **One-Click Scraping** - Extract business data while browsing Google Maps
 - **Comprehensive Data** - Name, phone, email, website, address, rating, reviews, category
-- **Excel Export** - Download results as `.xlsx` spreadsheet
+- **Google Sheet Export** - Push results straight into an online Google Sheet you can view & share
+- **Excel Export** - Or download results as a local `.xlsx` spreadsheet (fallback)
+- **Auto-Scroll** - Loads results for you up to your chosen max
+- **Live Progress** - See the count climb as it scrapes; data is saved if you close the popup
 - **Fast & Efficient** - Scrapes up to 500 businesses in minutes
-- **Works Offline** - No external servers, all processing in-browser
-- **Privacy First** - Data never leaves your browser
 
 ## 📋 What Gets Extracted
 
@@ -23,6 +24,36 @@ Extract business leads from Google Maps directly in your Brave browser. Perfect 
 | Category | Business type (restaurant, dentist, etc.) |
 | Rating | Google Maps star rating |
 | Reviews | Number of reviews |
+| Scraped At | When the row was scraped |
+
+## 📤 Sending Results to a Google Sheet
+
+The extension can push your leads into an **online Google Sheet** that you own and can share.
+This uses a small Google Apps Script "web app" — no Google Cloud project or sign-in
+configuration required, and it works in Brave.
+
+### One-time setup
+
+1. Go to [sheets.google.com](https://sheets.google.com) and create a new blank spreadsheet.
+2. In that sheet, open **Extensions → Apps Script** and delete any sample code.
+3. Copy the contents of [`extension/apps_script.gs`](extension/apps_script.gs) into the editor and **Save**.
+4. *(Optional)* set a `SECRET` value at the top of the script, and paste the same value into the
+   extension's **Secret** box.
+5. Click **Deploy → New deployment**:
+   - Type (gear icon) → **Web app**
+   - **Execute as:** Me
+   - **Who has access:** Anyone with the link
+   - Click **Deploy**, then authorize access.
+6. Copy the **Web app URL** (it ends in `/exec`).
+
+### Using it
+
+1. Open the extension popup and expand **Google Sheet setup**.
+2. Paste the `/exec` URL (and Secret, if you set one). It's saved for next time.
+3. Scrape as usual, then click **Send to Google Sheet** — a new tab opens your sheet with the rows.
+
+> ⚠️ **Privacy note:** Unlike the local Excel export, sending to a Google Sheet uploads your
+> scraped leads to your Google account. The data goes to *your* sheet, but it does leave the browser.
 
 ## 🚀 Installation (Brave Browser)
 
@@ -84,9 +115,9 @@ Or download the ZIP and extract it.
    - You'll see progress in the popup
    - Don't close the tab while scraping!
 
-7. **Download Excel file**
-   - Click "Download Excel" when done
-   - File saves as `google_maps_leads_TIMESTAMP.xlsx`
+7. **Export your leads**
+   - Click **"Send to Google Sheet"** to push them online (see setup above), or
+   - Click **"Download Excel"** to save a local `google_maps_leads_TIMESTAMP.xlsx`
 
 ### Example Workflow
 
@@ -266,6 +297,7 @@ extension/
 ├── popup.js              # Popup logic & Excel export
 ├── content.js            # Google Maps scraper
 ├── styles.css            # Popup styling
+├── apps_script.gs        # Google Apps Script web app (paste into Google Sheets)
 └── icons/
     ├── icon16.png        # Toolbar icon
     ├── icon48.png        # Extension manager icon

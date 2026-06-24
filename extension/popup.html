@@ -36,6 +36,21 @@
         Start Scraping
       </button>
 
+      <details class="sheet-setup">
+        <summary>Google Sheet setup</summary>
+        <div class="sheet-fields">
+          <label for="sheetUrl">Web app URL (ends in /exec):</label>
+          <input type="text" id="sheetUrl" placeholder="https://script.google.com/.../exec">
+          <label for="sheetSecret">Secret (optional):</label>
+          <input type="text" id="sheetSecret" placeholder="leave blank if unused">
+          <p class="sheet-hint">See <strong>apps_script.gs</strong> for one-time setup steps.</p>
+        </div>
+      </details>
+
+      <button type="button" id="sendSheetBtn" class="btn-primary" disabled>
+        Send to Google Sheet
+      </button>
+
       <button type="button" id="exportBtn" class="btn-secondary" disabled>
         Download Excel
       </button>

@@ -5,10 +5,13 @@
   "description": "Extract business leads from Google Maps for cold calling and web development outreach",
   "permissions": [
     "activeTab",
-    "downloads"
+    "downloads",
+    "storage"
   ],
   "host_permissions": [
-    "https://www.google.com/maps/*"
+    "https://www.google.com/maps/*",
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
